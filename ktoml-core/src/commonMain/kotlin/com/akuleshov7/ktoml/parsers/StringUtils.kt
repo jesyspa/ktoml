@@ -4,6 +4,7 @@
 
 package com.akuleshov7.ktoml.parsers
 
+import com.akuleshov7.ktoml.exceptions.InternalEncodingException
 import com.akuleshov7.ktoml.exceptions.ParseException
 import com.akuleshov7.ktoml.utils.convertSpecialCharacters
 import com.akuleshov7.ktoml.utils.newLineChar
@@ -97,14 +98,21 @@ internal fun String.convertLineEndingBackslash(): String {
  *
  * @param backslashIndex The index of the backslash to check
  * @return `true` if the backslash is a line-ending backslash, `false` otherwise
+ * @throws InternalEncodingException if [backslashIndex] is not a valid index into this string
  */
 internal fun String.isLineEndingBackslash(backslashIndex: Int): Boolean {
+    if (backslashIndex !in indices) {
+        throw InternalEncodingException(
+            "Called isLineEndingBackslash() with backslashIndex=$backslashIndex," +
+                    " which is not a valid index into a string of length $length."
+        )
+    }
     var j = backslashIndex + 1
     while (j < length && this[j] != newLineChar() && this[j].isWhitespace()) {
         j++
     }
 
-    return j == length || this[j] == newLineChar() || j == length
+    return j == length || this[j] == newLineChar()
 }
 
 /**
